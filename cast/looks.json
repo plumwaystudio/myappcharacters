@@ -52,13 +52,13 @@
   },
   "irisR": 14,
   "eyeR": 0.0128,
-  "faceTex": "../cast/faces/bri-face.png",
+  "faceTex": "/cast/faces/bri-face.png",
   "faceProj": {
    "cx": 0,
    "cy": 1.4741,
    "half": 0.115
   },
-  "outfitTex": "../cast/outfits/bri-outfit.png",
+  "outfitTex": "/cast/outfits/bri-outfit.png",
   "outfitProj": {
    "cy": 0.93,
    "hh": 0.94,
@@ -98,13 +98,13 @@
   "socks": "#FFFFFF",
   "roundGlasses": "#C9A45A",
   "camera": true,
-  "outfitTex": "../cast/outfits/lowkey-outfit.png",
+  "outfitTex": "/cast/outfits/lowkey-outfit.png",
   "outfitProj": {
    "cy": 0.93,
    "hh": 0.94,
    "hw": 0.8355555555555554
   },
-  "faceTex": "../cast/faces/lowkey-face.png",
+  "faceTex": "/cast/faces/lowkey-face.png",
   "faceProj": {
    "cx": 0,
    "cy": 1.6381999999999999,
@@ -171,13 +171,13 @@
   "earStack": true,
   "irisR": 14,
   "eyeR": 0.0128,
-  "faceTex": "../cast/faces/nia-face.png",
+  "faceTex": "/cast/faces/nia-face.png",
   "faceProj": {
    "cx": 0,
    "cy": 1.5476,
    "half": 0.115
   },
-  "outfitTex": "../cast/outfits/nia-outfit.png",
+  "outfitTex": "/cast/outfits/nia-outfit.png",
   "outfitProj": {
    "cy": 0.93,
    "hh": 0.94,
@@ -221,13 +221,13 @@
   "capBrim": "#E9B932",
   "keys": true,
   "platforms": "#F2F2F2",
-  "outfitTex": "../cast/outfits/kid-outfit.png",
+  "outfitTex": "/cast/outfits/kid-outfit.png",
   "outfitProj": {
    "cy": 0.93,
    "hh": 0.94,
    "hw": 0.8355555555555554
   },
-  "faceTex": "../cast/faces/kid-face.png",
+  "faceTex": "/cast/faces/kid-face.png",
   "faceProj": {
    "cx": 0,
    "cy": 1.6759,

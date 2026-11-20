@@ -2,8 +2,8 @@
 <script type="importmap">{"imports":{"three":"../../node_modules/three/build/three.module.js"}}</script></head><body>
 <script type="module">
 import * as THREE from 'three';
-import { loadMH, makeMH, idle, armDown, aimBone, morph, resetPose, grip } from '../../engine/mh.js';
-import { tex, noise, icedCup, phone } from '../../engine/cast.js';
+import { loadMH, makeMH, idle, armDown, aimBone, morph, resetPose, grip, styleBody, look, lashBlink } from '../../engine/mh.js';
+import { tex, noise, icedCup, phone, tumbler } from '../../engine/cast.js';
 const LW=360, LH=640;
 const R=new THREE.WebGLRenderer({antialias:false,preserveDrawingBuffer:true}); R.setSize(LW,LH); R.setPixelRatio(1); R.shadowMap.enabled=true; R.outputColorSpace=THREE.SRGBColorSpace;
 const out=document.createElement('canvas'); out.width=1080; out.height=1920; document.body.appendChild(out); const ox=out.getContext('2d');
@@ -25,7 +25,7 @@ const knit=T(32,32,(g,w,h)=>{for(let y=0;y<h;y++)for(let x=0;x<w;x++){const v=22
 const skinT=T(16,16,(g,w,h)=>{for(let y=0;y<h;y++)for(let x=0;x<w;x++){const v=236+Math.random()*16-8+(Math.random()<.08?-12:0); g.fillStyle=`rgb(${v|0},${v-3|0},${v-6|0})`; g.fillRect(x,y,1,1);}}); skinT.wrapS=skinT.wrapT=THREE.RepeatWrapping; skinT.repeat.set(26,26);
 const SPEC=await (await fetch('../../cast/looks.json')).json();
 const order=['lowkey','nia','bri','kid']; const cs={};
-for(const [i,k] of order.entries()){ const C=makeMH(await loadMH('../../cast/built/'+k+'-mh.json'),SPEC[k]); C.root.position.set([-.82,-.3,.3,.84][i],0,[.32,0,0,.12][i]); S.add(C.root); cs[k]=C; C.mesh.material[0].map=skinT; C.mesh.material[1].map=knit; C.mesh.material.forEach(m=>m.needsUpdate=true); }
+for(const [i,k] of order.entries()){ const DD=await loadMH('../../cast/built/'+k+'-mh.json'); const C=makeMH(DD,SPEC[k]); styleBody(C,DD,SPEC[k]); await Promise.all(C.loading||[]); C.root.position.set([-.82,-.3,.3,.84][i],0,[.32,0,0,.12][i]); S.add(C.root); cs[k]=C; C.mesh.material[0].map=skinT; C.mesh.material[1].map=knit; C.mesh.material.forEach(m=>m.needsUpdate=true); }
 const cam=new THREE.PerspectiveCamera(24,LW/LH,.05,100);
 const tmp=document.createElement('canvas'); tmp.width=LW; tmp.height=LH; const tx=tmp.getContext('2d');
 const post2=()=>{ const im=tx.getImageData(0,0,LW,LH), d=im.data, src=new Uint8ClampedArray(d);
@@ -39,7 +39,7 @@ const post2=()=>{ const im=tx.getImageData(0,0,LW,LH), d=im.data, src=new Uint8C
 
 const TL=await (await fetch('timeline.json')).json(); const DUR=TL.dur; const Ln=TL.lines; const c=.08;
 const EV={hook0:0, kid:Ln[1].t0, niaA:Ln[2].t0, niaB1:Ln[3].t1, flip:Ln[4].t0, ask0:Ln[5].t0, ask1:Ln[5].t1, punch:Ln[6].t0, end:Ln[7].t0};
-EV.ins0=EV.ask1+.05; EV.frz=EV.ins0+.5;
+EV.ins0=EV.ask1+.05; EV.frz=EV.ins0+.95; EV.ots=Ln[4].t1+.15;
 // couch + lamp behind them
 const cmat=new THREE.MeshLambertMaterial({map:T(32,32,(g,w,h)=>{for(let y=0;y<h;y++)for(let x=0;x<w;x++){const v=(x%4<2)^(y%4<2)?0:14; g.fillStyle=`rgb(${92+v+Math.random()*10|0},${104+v+Math.random()*10|0},${150+v+Math.random()*10|0})`; g.fillRect(x,y,1,1);}})});
 const add=(geo,m,x,y,z)=>{const o=new THREE.Mesh(geo,m);o.position.set(x,y,z);o.castShadow=o.receiveShadow=true;S.add(o);return o};
@@ -47,9 +47,9 @@ add(new THREE.BoxGeometry(2.4,.42,.8),cmat,0,.21,-.85); add(new THREE.BoxGeometr
 const lamp=add(new THREE.CylinderGeometry(.13,.18,.25,12,1,true),new THREE.MeshLambertMaterial({color:'#F6E3B4',emissive:'#7a6030',side:THREE.DoubleSide}),-1.45,1.55,-.95); add(new THREE.CylinderGeometry(.015,.015,1.4,6),new THREE.MeshLambertMaterial({color:'#333'}),-1.45,.7,-.95);
 const lampL=new THREE.PointLight('#FFC98A',1.2,4); lampL.position.set(-1.4,1.5,-.8); S.add(lampL);
 // props
-const cup=icedCup(); cup.scale.setScalar(.8); S.add(cup); window.GS=1;
+const cup=tumbler(SPEC.bri.propCol||'#F6C9D8'); cup.scale.setScalar(.85); S.add(cup); window.GS=1;
 // GLOW TAX phone screen (drawn UI, example numbers)
-const scr=document.createElement('canvas'); scr.width=360; scr.height=760; const sx=scr.getContext('2d');
+const scr=document.createElement('canvas'); scr.width=720; scr.height=1520; const sx=scr.getContext('2d'); sx.scale(2,2);
 function drawUI(reveal=1){ const g=sx, W=360,H=760; const gr=g.createLinearGradient(0,0,0,H); gr.addColorStop(0,'#FFE1EC'); gr.addColorStop(1,'#FFF6F9'); g.fillStyle=gr; g.fillRect(0,0,W,H);
   const hg=g.createLinearGradient(0,0,W,260); hg.addColorStop(0,'#FF2E7E'); hg.addColorStop(1,'#B3155A'); g.fillStyle=hg; g.beginPath(); g.roundRect(18,60,W-36,250,30); g.fill();
   g.fillStyle='#fff'; g.font='700 22px Archivo Black, Arial'; g.fillText('GLOW TAX',40,104); g.font='600 17px Arial'; g.globalAlpha=.85; g.fillText('This year',40,150); g.globalAlpha=1;
@@ -72,7 +72,7 @@ function pose(t){
   order.forEach((k,i)=>{const X=cs[k]; resetPose(X); idle(X,t+i*.8); armDown(X,'L',.14,.04); armDown(X,'R',.14,.04);
     morph(X,'eyeOpen',.3); morph(X,'mouth',Math.min(.55,E(k==='lowkey'?'lk':k,t+.035)*(k==='nia'?.4:.6))); const bl=((t+i*1.3)%3.7)<.12?1:0; morph(X,'blink',bl); morph(X,'smile',0); morph(X,'browUp',0); morph(X,'browL',0); });
   // facing: everyone angled to the group center, lowkey toward bri when phone
-  cs.lowkey.root.rotation.y=.35+sm(EV.ask0-.5,EV.ask0,t)*.55; cs.nia.root.rotation.y=.12; cs.bri.root.rotation.y=-.18; cs.kid.root.rotation.y=-.38;
+  cs.lowkey.root.rotation.y=.3+sm(EV.ots,EV.ask0,t)*.25; cs.nia.root.rotation.y=.12; cs.bri.root.rotation.y=-.18; cs.kid.root.rotation.y=-.38;
   // BRI: cup arm, sip early, smug
   aimBone(cs.bri,'upperarm01.R',V(-.3,-.9,.25)); aimBone(cs.bri,'lowerarm01.R',V(.25,.55,.8));
   morph(cs.bri,'smile',.25); morph(cs.bri,'browL',t>EV.flip&&t<EV.ask0?.7:.25);
@@ -89,19 +89,19 @@ function pose(t){
   const nh=headPos('nia'); glow.position.set(nh.x,nh.y-.08,nh.z+.2); glow.intensity=(t>EV.niaA-.2&&t<EV.flip)?.22:.08;
   if(t>EV.niaA&&t<EV.flip){ cs.nia.bones.neck02.rotation.x+=.18; morph(cs.nia,'browIn',.4); }
   // LOWKEY: deadpan, phone up toward Bri from 12.6
-  const up=sm(EV.ask0-.5,EV.ask0+.1,t);
+  const up=sm(EV.ots+.1,EV.ask0,t);
   if(up>0){ aimBone(cs.lowkey,'upperarm01.R',V(-.05,-.9+.55*up,.3+.6*up)); aimBone(cs.lowkey,'lowerarm01.R',V(.15,.15*up,1)); lkPhone.rotation.set(0,Math.PI,0); }
   morph(cs.lowkey,'smile',0); morph(cs.lowkey,'eyeOpen',.1);
 }
 // shots
-const shots=[[0,EV.kid-c,'briMid'],[EV.kid-c,EV.niaA-c,'kidClose'],[EV.niaA-c,EV.flip-c,'niaClose'],[EV.flip-c,EV.ask0-c,'briClose'],[EV.ask0-c,EV.ins0,'otsLk'],[EV.ins0,EV.frz,'insert'],[EV.frz,EV.punch-c,'briFreeze'],[EV.punch-c,EV.end-c,'lkClose'],[EV.end-c,99,'insertEnd']];
+const shots=[[0,EV.kid-c,'briMid'],[EV.kid-c,EV.niaA-c,'kidClose'],[EV.niaA-c,EV.flip-c,'niaClose'],[EV.flip-c,EV.ots,'briClose'],[EV.ots,EV.ins0,'otsLk'],[EV.ins0,EV.frz,'insert'],[EV.frz,EV.punch-c,'briFreeze'],[EV.punch-c,EV.end-c,'lkClose'],[EV.end-c,99,'insertEnd']];
 function camFor(name,t,t0){ const p=t-t0, push=p*.025;
   const close=(k,dx=.2,dist=1.0)=>{dist+=.38;dx*=1.3;{const h=headPos(k); cam.position.set(h.x+dx,h.y+.04,h.z+dist-push); cam.lookAt(h.x-.01,h.y+.055,h.z);}};
   if(name==='briMid'){ const h=headPos('bri'); cam.position.set(h.x+.45,h.y-.05,h.z+2.6-push*2); cam.lookAt(h.x-.05,h.y-.1,h.z); }
   else if(name==='kidClose') close('kid',-.15); else if(name==='niaClose') close('nia',.15,.95);
-  else if(name==='briClose') close('bri',.1,.9); else if(name==='briFreeze'){ const h=headPos('bri'); cam.position.set(h.x+.03,h.y+.05,h.z+1.05-p*.35); cam.lookAt(h.x,h.y+.06,h.z); }
+  else if(name==='briClose') close('bri',.1,.9); else if(name==='briFreeze'){ const h=headPos('bri'); cam.position.set(h.x+.05,h.y+.03,h.z+1.45-p*.35); cam.lookAt(h.x,h.y+.02,h.z); }
   else if(name==='lkClose') close('lowkey',.12,.85);
-  else if(name==='otsLk'){ const l=headPos('lowkey'), b=headPos('bri'); cam.position.set(l.x-.55,l.y-.05,l.z+2.0-push*2); cam.lookAt((l.x*2+b.x)/3,l.y-.15,(l.z+b.z)/2); }
+  else if(name==='otsLk'){ const l=headPos('lowkey'); cam.position.set(l.x+.5,l.y-.02,l.z+2.1-push*2); cam.lookAt(l.x+.1,l.y-.1,l.z); }
 }
 // 2D overlay: hook + subtitles
 const hook='pov: stretching your nail fill because you\'re "budgeting"';
@@ -115,18 +115,18 @@ function overlay(t){ const g=ox; g.textAlign='center';
     g.font='700 60px Pix'; ls.forEach((l,i)=>{ g.fillStyle='#000'; g.fillText(l,546,y0+i*70+6); g.fillStyle='#fff'; g.fillText(l,540,y0+i*70); }); }
   if(t>EV.end-c){ const a=sm(EV.end+.3,EV.end+.6,t); g.globalAlpha=a; g.font='700 40px Pix'; g.fillStyle='#000'; g.fillText('LINK IN MY STORY',544,1434); g.fillStyle='#FF8FBF'; g.fillText('LINK IN MY STORY',540,1430); g.globalAlpha=1; }
   g.textAlign='left'; }
-function insert(t,t0,end){ // phone close insert drawn on the low-res frame
-  const g=tx; drawUI(end?1:sm(t0,t0+.45,t)); scrTex.needsUpdate=true; g.fillStyle='rgba(30,20,24,.55)'; g.fillRect(0,0,LW,LH);
-  const pw=142,ph=292,x=(LW-pw)/2,y=168+(end?0:Math.sin(t*30)*1.2); g.fillStyle='#0d0d10'; g.beginPath(); g.roundRect(x-9,y-9,pw+18,ph+18,30); g.fill(); g.drawImage(scr,x,y,pw,ph);
-  // fingers
-  g.fillStyle='#9A6440'; g.beginPath(); g.roundRect(x-22,y+ph*.55,30,70,14); g.fill(); g.beginPath(); g.roundRect(x+pw-6,y+ph*.48,26,60,12); g.fill(); g.beginPath(); g.roundRect(x+pw-8,y+ph*.62,26,58,12); g.fill(); }
+function insert(t,t0,end){ // phone insert drawn crisp on the full-res frame, after the PS2 post
+  const g=ox, K=3; drawUI(end?1:sm(t0,t0+.45,t)); scrTex.needsUpdate=true; g.fillStyle='rgba(30,20,24,.55)'; g.fillRect(0,0,1080,1920);
+  const pw=142*K,ph=292*K,x=(1080-pw)/2,y=168*K+(end?0:Math.sin(t*30)*2); g.imageSmoothingEnabled=true; g.imageSmoothingQuality='high';
+  g.fillStyle='#0d0d10'; g.beginPath(); g.roundRect(x-27,y-27,pw+54,ph+54,90); g.fill(); g.save(); g.beginPath(); g.roundRect(x,y,pw,ph,64); g.clip(); g.drawImage(scr,x,y,pw,ph); g.restore();
+  g.fillStyle='#0d0d10'; g.beginPath(); g.roundRect(x+pw/2-70,y+14,140,34,17); g.fill();
+  g.fillStyle='#8a5634'; g.beginPath(); g.roundRect(x-66,y+ph*.55,90,210,42); g.fill(); g.beginPath(); g.roundRect(x+pw-18,y+ph*.48,78,180,36); g.fill(); g.beginPath(); g.roundRect(x+pw-24,y+ph*.62,78,174,36); g.fill(); }
 window.handCam=(t,sg)=>{window.GS=sg; pose(t); const w=new THREE.Vector3(); cs.bri.bones['wrist.R'].getWorldPosition(w); cam.position.set(w.x+.25,w.y+.08,w.z+.55); cam.lookAt(w.x,w.y,w.z); R.render(S,cam); tx.drawImage(R.domElement,0,0); post2(); return out.toDataURL('image/jpeg',.85);};
 window.frame=(t)=>{ pose(t); const sh=shots.find(s=>t>=s[0]&&t<s[1]);
   if(sh[2]!=='insert'&&sh[2]!=='insertEnd') camFor(sh[2],t,sh[0]); else { const h=headPos('lowkey'); cam.position.set(h.x+.6,h.y,h.z+1.2); cam.lookAt(h.x,h.y-.2,h.z); }
   R.render(S,cam); tx.drawImage(R.domElement,0,0);
-  if(sh[2]==='insert'||sh[2]==='insertEnd') insert(t,sh[0],sh[2]==='insertEnd');
-  post2(); overlay(t); return out.toDataURL('image/jpeg',.82); };
+  post2(); if(sh[2]==='insert'||sh[2]==='insertEnd') insert(t,sh[0],sh[2]==='insertEnd'); overlay(t); return out.toDataURL('image/jpeg',.82); };
 
 await document.fonts.load('700 46px Pix'); await document.fonts.load('900 62px "Archivo Black"');
-window.DUR=DUR; window.EV=EV; window.ready=true;
+window.DUR=DUR; window.EV=EV; window.SHOTS=shots; window.ready=true;
 </script></body></html>

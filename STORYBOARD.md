@@ -8,6 +8,10 @@ These rules keep the cast consistent and stick to what this engine does best: fr
 - No more than 2 lines per character. LOWKEY always gets the last deadpan line (the "button").
 - Structure: pov hook → setup → it gets worse → twist → LOWKEY's button → app reveal.
 
+## Pacing and the phone
+- **Don't cut too fast.** Hold each shot at least 2 seconds; the only shorter ones are the reveal stingers (phone insert and freeze reaction, about 1 second each). Put a short silent beat before the reveal line so it lands.
+- **The app always looks clean.** The phone screen is drawn sharp at full resolution *after* the PS2 filter, never pixelated or grainy. Real UI, readable numbers, "Example numbers" on screen.
+
 ## Stage marks (characters never move from these)
 Wide shot, left to right: **LOWKEY · Nia · Bri · Klarna Kid**, standing in a shallow arc and facing the camera, turned slightly toward the center. Characters turn their head or upper body, but they never walk, sit or swap places.
 
