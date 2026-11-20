@@ -1,0 +1,52 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{margin:0}@font-face{font-family:Pix;src:url(../node_modules/@fontsource/silkscreen/files/silkscreen-latin-700-normal.woff2)}</style>
+<script type="importmap">{"imports":{"three":"../node_modules/three/build/three.module.js"}}</script></head><body>
+<script type="module">
+import * as THREE from 'three';
+import { loadMH, makeMH, idle, armDown, aimBone, morph, resetPose, grip, styleBody, look, lashBlink } from '../engine/mh.js';
+import { tex, noise, icedCup, phone, tumbler } from '../engine/cast.js';
+const LW=360, LH=640;
+const R=new THREE.WebGLRenderer({antialias:false,preserveDrawingBuffer:true}); R.setSize(LW,LH); R.setPixelRatio(1); R.shadowMap.enabled=true; R.outputColorSpace=THREE.SRGBColorSpace;
+const out=document.createElement('canvas'); out.width=1080; out.height=1920; document.body.appendChild(out); const ox=out.getContext('2d');
+const S=new THREE.Scene(); S.background=new THREE.Color('#3a2c2a');
+S.add(new THREE.HemisphereLight('#FFF4E6','#7a6050',1.75)); S.add(new THREE.AmbientLight('#ffffff',.25)); const key=new THREE.DirectionalLight('#FFE9D2',1.35); key.position.set(.6,1.9,3.6); key.castShadow=true; key.shadow.mapSize.set(1024,1024); key.shadow.bias=-.0006; S.add(key);
+const T=(w,h,f)=>{const t=tex(w,h,f); t.magFilter=THREE.NearestFilter; return t;};
+// wood-panel wall with visible texels (original set)
+const woodT=T(64,64,(g,w,h)=>{ for(let x=0;x<w;x+=16){ const base=[150+Math.random()*20|0,96+Math.random()*14|0,64+Math.random()*10|0]; for(let y=0;y<h;y++) for(let i=0;i<16;i++){ const n=(Math.sin((y*.35+i*.9+x)*1.3)+Math.sin(y*.11+x))*9+Math.random()*10; g.fillStyle=`rgb(${base[0]+n|0},${base[1]+n*.7|0},${base[2]+n*.5|0})`; g.fillRect(x+i,y,1,1);} g.fillStyle='rgba(40,22,12,.85)'; g.fillRect(x,0,1,h);} });
+woodT.wrapS=woodT.wrapT=THREE.RepeatWrapping; woodT.repeat.set(5,2.2);
+const wall=new THREE.Mesh(new THREE.PlaneGeometry(8,4.4),new THREE.MeshLambertMaterial({map:woodT})); wall.position.set(0,2.2,-1.2); S.add(wall);
+const poster=(x,y,w,h,draw)=>{const m=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshLambertMaterial({map:T(32,Math.round(32*h/w),draw)})); m.position.set(x,y,-1.19); S.add(m);};
+poster(-.62,1.72,.42,.56,(g,w,h)=>{g.fillStyle='#E9DCC4';g.fillRect(0,0,w,h);g.fillStyle='#D9603F';g.beginPath();g.arc(w/2,h*.4,9,0,7);g.fill();g.fillStyle='#2F5D62';g.fillRect(4,h*.7,w-8,3);g.fillRect(4,h*.8,w-14,2);});
+poster(.7,1.85,.36,.36,(g,w,h)=>{g.fillStyle='#2B2B33';g.fillRect(0,0,w,h);g.fillStyle='#F2C14E';g.fillRect(6,6,w-12,h-12);g.fillStyle='#2B2B33';g.fillRect(10,10,w-20,h-20);});
+const shelf=new THREE.Mesh(new THREE.BoxGeometry(.9,.04,.2),new THREE.MeshLambertMaterial({map:T(16,4,(g,w,h)=>noise(g,w,h,'#5a3a26',20))})); shelf.position.set(.75,1.35,-1.1); S.add(shelf);
+[['#C94C4C',.5],['#3E7CB1',.6],['#E8C547',.68],['#4F8A5B',.78]].forEach(([c,x])=>{const b=new THREE.Mesh(new THREE.BoxGeometry(.05,.2,.15),new THREE.MeshLambertMaterial({color:c})); b.position.set(x,1.47,-1.1); S.add(b);});
+const plant=new THREE.Mesh(new THREE.SphereGeometry(.09,8,6),new THREE.MeshLambertMaterial({map:T(16,16,(g,w,h)=>noise(g,w,h,'#4b7a3e',40))})); plant.position.set(1.0,1.45,-1.1); S.add(plant);
+const fl=new THREE.Mesh(new THREE.PlaneGeometry(10,10),new THREE.MeshLambertMaterial({map:T(32,32,(g,w,h)=>noise(g,w,h,'#6e4d3c',18))})); fl.rotation.x=-Math.PI/2; fl.receiveShadow=true; S.add(fl);
+const knit=T(32,32,(g,w,h)=>{for(let y=0;y<h;y++)for(let x=0;x<w;x++){const v=222+(x%2==0?-22:0)+Math.random()*22-11; g.fillStyle=`rgb(${v|0},${v|0},${v|0})`; g.fillRect(x,y,1,1);}}); knit.wrapS=knit.wrapT=THREE.RepeatWrapping; knit.repeat.set(1,1);
+const skinT=T(16,16,(g,w,h)=>{for(let y=0;y<h;y++)for(let x=0;x<w;x++){const v=236+Math.random()*16-8+(Math.random()<.08?-12:0); g.fillStyle=`rgb(${v|0},${v-3|0},${v-6|0})`; g.fillRect(x,y,1,1);}}); skinT.wrapS=skinT.wrapT=THREE.RepeatWrapping; skinT.repeat.set(26,26);
+const SPEC=await (await fetch('../cast/looks.json?'+Date.now())).json();
+const cam=new THREE.PerspectiveCamera(24,LW/LH,.05,100);
+const tmp=document.createElement('canvas'); tmp.width=LW; tmp.height=LH; const tx=tmp.getContext('2d');
+const post2=()=>{ const im=tx.getImageData(0,0,LW,LH), d=im.data, src=new Uint8ClampedArray(d);
+  const W4=LW*4;
+  for(let y=1;y<LH-1;y++) for(let x=1;x<LW-1;x++){ const i=y*W4+x*4;
+    for(let c=0;c<3;c++){ let v=src[i+c]*1.6-(src[i+c-4]+src[i+c+4]+src[i+c-W4]+src[i+c+W4])*.15; d[i+c]=v; } }
+  for(let i=0;i<d.length;i+=4){ let r=d[i],g=d[i+1],b=d[i+2]; const l=.3*r+.59*g+.11*b; r=l+(r-l)*.84; g=l+(g-l)*.84; b=l+(b-l)*.84;
+    r=r*1.04+5; g=g+2; b=b*.92+3; r=128+(r-128)*1.08; g=128+(g-128)*1.08; b=128+(b-128)*1.08; const dn=(Math.random()-.5)*14;
+    d[i]=Math.round((r+dn)/9)*9; d[i+1]=Math.round((g+dn)/9)*9; d[i+2]=Math.round((b+dn)/9)*9; }
+  tx.putImageData(im,0,0); ox.imageSmoothingEnabled=false; ox.drawImage(tmp,0,0,1080,1920); };
+
+
+const who=new URLSearchParams(location.search).get('c')||'bri';
+const D=await loadMH('../cast/built/'+who+'-mh.json'); const C=makeMH(D,SPEC[who]); styleBody(C,D,SPEC[who]); S.add(C.root); await Promise.all(C.loading||[]);
+C.mesh.material[0].map=skinT; C.mesh.material[1].map=knit; C.mesh.material.forEach(m=>m.needsUpdate=true);
+let prop=null; const P=SPEC[who].prop; if(P==='tumbler'){prop=tumbler(SPEC[who].propCol);} else if(P==='cup'){prop=icedCup();} else if(P==='phone'){prop=phone();} if(prop) S.add(prop);
+const V=(x,y,z)=>new THREE.Vector3(x,y,z);
+window.frame=(t,shot,o={})=>{ resetPose(C); idle(C,t); armDown(C,'L',.14,.04); armDown(C,'R',.14,.04); morph(C,'eyeOpen',.3); morph(C,'smile',o.smile??.2); morph(C,'browL',o.browL||0); look(C,o.lx||0,o.ly||0); if(o.tilt){C.bones.neck02.rotation.z+=o.tilt;} lashBlink(C,0);
+  if(prop){ aimBone(C,'upperarm01.R',V(-.3,-.9,.25)); aimBone(C,'lowerarm01.R',V(.25,.55,.8)); const g=grip(C,'R',1,1); prop.position.copy(g.center); prop.rotation.set(0,0,0); }
+  if(C.keys){ C.keys.rotation.z=t*12; }
+  C.root.rotation.y=shot==='back'?Math.PI*.85:shot==='side'?.6:.12;
+  const h=new THREE.Vector3(); C.bones.head.getWorldPosition(h);
+  if(shot==='full'){cam.position.set(.2,1.0,5.0);cam.lookAt(0,.9,0);} else if(shot==='back'){cam.position.set(.3,1.2,3.4);cam.lookAt(0,1.1,0);} else {cam.position.set(h.x+.25,h.y+.04,h.z+1.25);cam.lookAt(h.x,h.y+.02,h.z);}
+  R.render(S,cam); tx.drawImage(R.domElement,0,0); post2(); return out.toDataURL('image/jpeg',.85); };
+window.ready=true;
+</script></body></html>

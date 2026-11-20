@@ -6,14 +6,16 @@ The recurring cast for Edward's (@drn.vlo) app skit Reels: a friend group of fou
 
 | Character | Who they are | App | Look |
 |---|---|---|---|
-| **LOWKEY** | Deadpan one who quietly has the apps; his flat line ends every joke | all three | Curly top, gray sweatshirt with hood, black joggers, white sneakers |
-| **Nia** ("3AM Cart") | Dreamy impulse shopper, whispers "add to cart" | COOL OFF | Curly updo, oversized cream top, gray sweats, glam makeup |
-| **Bri** ("Glow Girl") | Always freshly done, unbothered until she sees her yearly total | GLOW TAX | Long sleek hair, gold hoops, pink knit set, iced coffee, pink nails |
-| **Klarna Kid** | Loud flexer, "it's only $25" | OWED | Waves, gold chain, burgundy varsity top with cream sleeves, red sneakers |
+| **LOWKEY** | Deadpan one who quietly has the apps; his flat line ends every joke | all three | Grandpa-core: tight curly top, round gold glasses, cream cable cardigan, striped tee, brown cords, loafers, film camera |
+| **Nia** ("3AM Cart") | Dreamy impulse shopper, whispers "add to cart" | COOL OFF | Y2K thrift queen: curly space buns, butterfly clips, shades on head, lilac baby tee, butter cargos, platforms, charm bag, septum ring |
+| **Bri** ("Glow Girl") | Always freshly done, unbothered until she sees her yearly total | GLOW TAX | Pilates princess: pink cap over long hair, pink ribbed set, white socks + sneakers, giant tumbler, yoga mat |
+| **Klarna Kid** | Loud flexer, "it's only $25" | OWED | Jersey fit: backward red cap, red/gold #4 jersey + shorts, tall socks, chunky sneakers, chain, keys |
 
-The girls are adults in their early 20s. Every character is an original design: never copy another creator's characters, jokes or sets.
+Faces and outfits are AI-painted (ElevenLabs images) and projected onto the code-built 3D bodies (`cast/faces`, `cast/outfits`); all animation is code. The girls are adults in their early 20s. Every character is an original design.
 
 Voices (ElevenLabs): LOWKEY `nXmkjgNf2VzCsDMFNrH4`, Bri / Glow Girl `o9B86nZP8mMLaT5FBEzP`, Nia / 3AM Cart `3YXAuwCx7wB8kSkKCqsu`, Klarna Kid `wSqOdjeNqDrHcoK0zorF`.
+
+**Writing a skit? Read [STORYBOARD.md](STORYBOARD.md) first.**
 
 ## What's in here
 

@@ -16,9 +16,16 @@
   "macrodetails/caucasian-male-young": 0.3,
   "macrodetails/asian-male-young": 0.15,
   "macrodetails/universal-male-young-averagemuscle-averageweight": 1.0,
-  "head/head-oval": 0.3,
+  "head/head-oval": 0.4,
   "eyes/l-eye-height2-decr": 0.2,
   "eyes/r-eye-height2-decr": 0.2,
-  "chin/chin-width-incr": 0.1
+  "chin/chin-width-incr": 0.1,
+  "eyes/l-eye-scale-incr": 0.35,
+  "eyes/r-eye-scale-incr": 0.35,
+  "nose/nose-scale-horiz-decr": 0.2,
+  "nose/nose-volume-decr": 0.2,
+  "chin/chin-width-decr": 0.1,
+  "cheek/l-cheek-bones-incr": 0.3,
+  "cheek/r-cheek-bones-incr": 0.3
  }
 }

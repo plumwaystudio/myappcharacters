@@ -157,3 +157,12 @@ export function pose(C, o = {}) {
   C.mouth.scale.y = .18 + (o.mouth || 0) * .9; C.mouth.position.y = .06 - (o.mouth || 0) * .008;
   if (C.tail) C.tail.rotation.z = Math.sin(t * 2.2) * .12;
 }
+
+export function tumbler(col = '#F6C9D8') {
+  const g = new THREE.Group();
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(.046, .036, .2, 20), L({ color: col })); g.add(body);
+  const lid = new THREE.Mesh(new THREE.CylinderGeometry(.048, .048, .025, 20), L({ color: '#F4F1EA' })); lid.position.y = .11; g.add(lid);
+  const straw = new THREE.Mesh(new THREE.CylinderGeometry(.005, .005, .1, 6), L({ color: '#FFFFFF' })); straw.position.set(.012, .16, 0); g.add(straw);
+  const handle = new THREE.Mesh(new THREE.TorusGeometry(.04, .008, 6, 14, Math.PI), L({ color: col })); handle.rotation.z = -Math.PI / 2; handle.position.set(.05, .01, 0); g.add(handle);
+  return g;
+}
