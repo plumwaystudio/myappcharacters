@@ -1,0 +1,24 @@
+{
+ "out": "cast/built/lowkey-mh.json",
+ "groups": [
+  "body",
+  "helper-l-eye",
+  "helper-r-eye",
+  "helper-tights"
+ ],
+ "ethnic": {
+  "african": 0.55,
+  "caucasian": 0.3,
+  "asian": 0.15
+ },
+ "targets": {
+  "macrodetails/african-male-young": 0.55,
+  "macrodetails/caucasian-male-young": 0.3,
+  "macrodetails/asian-male-young": 0.15,
+  "macrodetails/universal-male-young-averagemuscle-averageweight": 1.0,
+  "head/head-oval": 0.3,
+  "eyes/l-eye-height2-decr": 0.2,
+  "eyes/r-eye-height2-decr": 0.2,
+  "chin/chin-width-incr": 0.1
+ }
+}

@@ -1,0 +1,4 @@
+node_modules/
+base/targets.npz
+out/
+*.tmp.mp4

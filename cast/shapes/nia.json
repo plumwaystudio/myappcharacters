@@ -1,0 +1,34 @@
+{
+ "out": "cast/built/nia-mh.json",
+ "groups": [
+  "body",
+  "helper-l-eye",
+  "helper-r-eye",
+  "helper-tights"
+ ],
+ "ethnic": {
+  "african": 0.85,
+  "caucasian": 0.15
+ },
+ "targets": {
+  "macrodetails/african-female-young": 0.85,
+  "macrodetails/caucasian-female-young": 0.15,
+  "macrodetails/universal-female-young-averagemuscle-averageweight": 1.0,
+  "head/head-oval": 0.5,
+  "chin/chin-width-decr": 0.35,
+  "nose/nose-scale-horiz-decr": 0.15,
+  "nose/nose-point-up": 0.25,
+  "nose/nose-scale-vert-decr": 0.15,
+  "mouth/mouth-upperlip-volume-incr": 0.25,
+  "mouth/mouth-lowerlip-volume-incr": 0.3,
+  "eyes/l-eye-scale-incr": 0.12,
+  "eyes/r-eye-scale-incr": 0.12,
+  "cheek/l-cheek-bones-incr": 0.35,
+  "cheek/r-cheek-bones-incr": 0.35,
+  "neck/neck-scale-horiz-decr": 0.3,
+  "measure/measure-waist-circ-decr": 0.35,
+  "hip/hip-scale-horiz-incr": 0.15,
+  "eyes/l-eye-corner2-up": 0.25,
+  "eyes/r-eye-corner2-up": 0.25
+ }
+}

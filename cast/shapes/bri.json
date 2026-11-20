@@ -1,0 +1,37 @@
+{
+ "out": "cast/built/bri-mh.json",
+ "groups": [
+  "body",
+  "helper-l-eye",
+  "helper-r-eye",
+  "helper-tights"
+ ],
+ "ethnic": {
+  "caucasian": 0.5,
+  "african": 0.2,
+  "asian": 0.3
+ },
+ "targets": {
+  "macrodetails/caucasian-female-young": 0.5,
+  "macrodetails/african-female-young": 0.2,
+  "macrodetails/asian-female-young": 0.3,
+  "macrodetails/universal-female-young-averagemuscle-averageweight": 1.0,
+  "head/head-oval": 0.5,
+  "chin/chin-width-decr": 0.35,
+  "nose/nose-scale-horiz-decr": 0.3,
+  "nose/nose-point-up": 0.3,
+  "nose/nose-scale-vert-decr": 0.15,
+  "mouth/mouth-lowerlip-volume-incr": 0.1,
+  "eyes/l-eye-scale-incr": 0.22,
+  "eyes/r-eye-scale-incr": 0.22,
+  "cheek/l-cheek-bones-incr": 0.5,
+  "cheek/r-cheek-bones-incr": 0.5,
+  "neck/neck-scale-horiz-decr": 0.3,
+  "measure/measure-waist-circ-decr": 0.35,
+  "hip/hip-scale-horiz-incr": 0.15,
+  "eyes/l-eye-corner2-up": 0.4,
+  "eyes/r-eye-corner2-up": 0.4,
+  "chin/chin-prominent-incr": 0.15,
+  "neck/neck-scale-vert-incr": 0.3
+ }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "myappcharacters",
+  "private": true,
+  "description": "Edward's recurring PS2-style cast for app skit Reels (OWED, COOL OFF, GLOW TAX), built in code",
+  "dependencies": { "three": "0.169.0", "@fontsource/silkscreen": "5.3.0" }
+}
