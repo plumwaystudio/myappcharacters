@@ -3,7 +3,7 @@
 import * as THREE from 'three';
 import { loadMH, makeMH, resetPose, morph, styleBody } from '../engine/mh.js';
 const who=new URLSearchParams(location.search).get('c');
-const SPEC=await (await fetch('../cast/looks.json?'+Date.now())).json(); const sp={...SPEC[who], cap:null, cards:null, buns:false, clips:null, shadesUp:null, lashes2:false, bake:true};
+const SPEC=await (await fetch('../cast/looks.json?'+Date.now())).json(); const sp={...SPEC[who], cap:null, cards:null, roundGlasses:null, buns:false, clips:null, shadesUp:null, lashes2:false, bake:true};
 const D=await loadMH('../cast/built/'+who+'-mh.json'); const C=makeMH(D,sp);
 const R=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true}); R.setSize(1024,1024); R.outputColorSpace=THREE.SRGBColorSpace; document.body.appendChild(R.domElement);
 const S=new THREE.Scene(); S.background=new THREE.Color('#808080'); S.add(new THREE.AmbientLight('#ffffff',2.2)); const d=new THREE.DirectionalLight('#ffffff',.6); d.position.set(0,0,5); S.add(d); S.add(C.root);
@@ -11,5 +11,7 @@ if(C.hair) C.hair.visible=true;
 morph(C,'eyeOpen',.3); C.root.updateMatrixWorld(true);
 const ey=C.eyeC.l.y, cx=0, cy=ey-.02, half=.115;
 const cam=new THREE.OrthographicCamera(-half,half,half,-half,.01,10); cam.position.set(cx,cy,3); cam.lookAt(cx,cy,0);
-R.render(S,cam); window.params={cx,cy,half}; window.img=R.domElement.toDataURL('image/png'); window.ready=true;
+R.render(S,cam); const P=(v)=>[ (v.x-cx)/half*512+512, (cy-v.y)/half*512+512 ];
+let mx=0,my=0,mn=0; const pos=D.pos; for(let i=0;i<D.mask.lips.length;i++){ if(D.mask.lips[i]>.75){mx+=pos[i*3];my+=pos[i*3+1];mn++;} }
+window.params={cx,cy,half, eyeL:P(C.eyeC.l), eyeR:P(C.eyeC.r), mouth:P({x:mx/mn,y:my/mn})}; window.img=R.domElement.toDataURL('image/png'); window.ready=true;
 </script></body></html>
