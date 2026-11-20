@@ -1,6 +1,8 @@
 // MakeHuman-based characters (CC0 base mesh + shape targets), skinned and painted in code, PS2 look.
 import * as THREE from 'three';
 import { tex, noise } from './cast.js';
+export const MODE = { clean: false };
+const F = () => MODE.clean ? THREE.LinearFilter : THREE.NearestFilter;
 
 const L = o => new THREE.MeshLambertMaterial(o);
 const V3 = (a, i) => new THREE.Vector3(a[i * 3], a[i * 3 + 1], a[i * 3 + 2]);
@@ -69,6 +71,7 @@ export function makeMH(D, spec) {
     if (cl && spec.detail && cl !== shoes) { const ang = Math.atan2(p.x - (p.x > 0 ? .09 : -.09) * (cl === legs ? 1 : 0), p.z);
       if (cl === top) { c.multiplyScalar(.93 + .07 * (Math.sin(Math.atan2(p.x, p.z) * 70) > 0 ? 1 : 0)); if (spec.cropTop && p.y < (spec.cropHigh ?? 1.075) + .018) c.multiplyScalar(.86); }
       if (cl === legs) { if (p.y > (spec.waist ?? 1.0) - .035) c.multiplyScalar(1.08); else if (p.y < .5) c.multiplyScalar(.9 + .1 * Math.sin(ang * 5 + p.y * 9)); } }
+    else if (g === 1 && !cl && spec.faceTex) { c.copy(skin); }
     else if (g === 1) {
       c.copy(skin);
       c.lerp(lips, Math.min(1, Math.max(0, M.lips[i] - .46) * 4) * (spec.lipAmt ?? .8));
@@ -141,7 +144,7 @@ export function makeMH(D, spec) {
   const hp0 = head('head');
   ['l', 'r'].forEach(sd => { const e = new THREE.Vector3(...D.eyeC[sd]); const g = new THREE.SphereGeometry(spec.eyeR ?? .0118, 20, 14); 
     const m = new THREE.Mesh(g, L({ map: irisTex })); m.position.copy(e).sub(hp0); m.position.z -= .002; C.bones.head.add(m); C.eyeballs.push(m); });
-  mats[2].visible = false;
+  mats[2].visible = false; if (spec.faceTex) C.eyeballs.forEach(e => e.visible = false);
   // rest pose bookkeeping for aim()
   C.bind = {}; D.bones.forEach(b => { C.bind[b.n] = new THREE.Vector3(...b.t).sub(new THREE.Vector3(...b.h)).normalize(); });
   return C;
@@ -162,7 +165,7 @@ function buildHair(C, D, pos, spec) {
     }
   }
   const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); g.setIndex(I); g.computeVertexNormals();
-  const strands = tex(16, 32, (x, w, h) => { x.fillStyle = spec.hair; x.fillRect(0, 0, w, h); for (let i = 0; i < 26; i++) { x.fillStyle = `rgba(${Math.random() < .5 ? '255,235,210' : '0,0,0'},${.12 + Math.random() * .16})`; x.fillRect(Math.random() * w | 0, 0, 1, h); } for (let i = 0; i < 30; i++) { x.fillStyle = 'rgba(0,0,0,.12)'; x.fillRect(Math.random() * w | 0, Math.random() * h | 0, 1, 3); } }); strands.magFilter = THREE.NearestFilter;
+  const strands = tex(16, 32, (x, w, h) => { x.fillStyle = spec.hair; x.fillRect(0, 0, w, h); for (let i = 0; i < 26; i++) { x.fillStyle = `rgba(${Math.random() < .5 ? '255,235,210' : '0,0,0'},${.12 + Math.random() * .16})`; x.fillRect(Math.random() * w | 0, 0, 1, h); } for (let i = 0; i < 30; i++) { x.fillStyle = 'rgba(0,0,0,.12)'; x.fillRect(Math.random() * w | 0, Math.random() * h | 0, 1, 3); } }); strands.magFilter = F();
   // spherical uv for strand texture
   const uv = []; for (let i = 0; i < P.length; i += 3) { uv.push(Math.atan2(P[i], P[i + 2]) / Math.PI * 4, P[i + 1] * 6); } g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
   strands.wrapS = strands.wrapT = THREE.RepeatWrapping;
@@ -174,7 +177,7 @@ function buildHair(C, D, pos, spec) {
     const tail = new THREE.Mesh(new THREE.CapsuleGeometry(.03, .2, 6, 12), hm); tail.position.set(0, browY - hp.y - .06, eyeL.z - hp.z - .19); tail.rotation.x = .38; tail.scale.set(1, 1, .8); headB.add(tail); C.tail = tail;
     const bun = new THREE.Mesh(new THREE.SphereGeometry(.034, 14, 10), hm); bun.position.copy(tie.position).add(new THREE.Vector3(0, -.012, -.02)); headB.add(bun);
   }
-  const curlM = L({ map: (() => { const t = tex(16, 16, (x, w, h) => noise(x, w, h, spec.hair, 30)); t.magFilter = THREE.NearestFilter; return t; })() });
+  const curlM = L({ map: (() => { const t = tex(16, 16, (x, w, h) => noise(x, w, h, spec.hair, 30)); t.magFilter = F(); return t; })() });
   const clump = (n, center, rad, size, mat0, seedv = 1, opts = {}) => { let sd = seedv * 9301; const rr = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
     for (let i = 0; i < n; i++) { const th = rr() * Math.PI * 2, ph = Math.acos(1 - 2 * rr() * (opts.cap ?? 1)), r = rad * (.75 + rr() * .3);
       const b = new THREE.Mesh(new THREE.SphereGeometry(size * (.75 + rr() * .5), 7, 5), curlM); b.position.set(center.x + Math.sin(ph) * Math.cos(th) * r * (opts.sx ?? 1), center.y + Math.cos(ph) * r * (opts.sy ?? 1), center.z + Math.sin(ph) * Math.sin(th) * r * (opts.sz ?? 1));
@@ -303,7 +306,7 @@ const M3 = (c, o = {}) => new THREE.MeshLambertMaterial({ color: c, ...o });
 function styleHead(C, spec, H, hm, fy, ez, eyeL, hp) {
   const hc = new THREE.Vector3(0, fy + .005, ez - .092); // approx skull center in head space
   if (spec.cards) hairCards(H, spec, hc, hm);
-  const curlT = (() => { const t = tex(16, 16, (x, w, h) => { for (let y = 0; y < h; y++) for (let i = 0; i < w; i++) { const v = 150 + Math.sin(i * 1.7 + y * 2.3) * 60 + Math.random() * 40; x.fillStyle = `rgb(${v | 0},${v | 0},${v | 0})`; x.fillRect(i, y, 1, 1); } }); t.magFilter = THREE.NearestFilter; return t; })();
+  const curlT = (() => { const t = tex(16, 16, (x, w, h) => { for (let y = 0; y < h; y++) for (let i = 0; i < w; i++) { const v = 150 + Math.sin(i * 1.7 + y * 2.3) * 60 + Math.random() * 40; x.fillStyle = `rgb(${v | 0},${v | 0},${v | 0})`; x.fillRect(i, y, 1, 1); } }); t.magFilter = F(); return t; })();
   const curlM = M3(spec.hair, { map: curlT });
   let cs = 4242; const cr = () => (cs = (cs * 16807) % 2147483647) / 2147483647;
   const curls = (center, rad, n, size, opt = {}) => { for (let i = 0; i < n; i++) { const th = cr() * Math.PI * 2, ph = Math.acos(1 - 2 * cr() * (opt.cap ?? 1)), r = rad * (.86 + cr() * .2);
@@ -311,32 +314,45 @@ function styleHead(C, spec, H, hm, fy, ez, eyeL, hp) {
       m.position.set(center.x + Math.sin(ph) * Math.cos(th) * r * (opt.sx ?? 1), center.y + Math.cos(ph) * r * (opt.sy ?? 1), center.z + Math.sin(ph) * Math.sin(th) * r * (opt.sz ?? 1)); m.rotation.set(cr() * 6, cr() * 6, cr() * 6); m.castShadow = true; H.add(m); } };
   if (spec.curlBuns) [-1, 1].forEach(sd => { const c = new THREE.Vector3(sd * .06, fy + .088, ez - .088); const core = new THREE.Mesh(new THREE.SphereGeometry(.03, 12, 8), curlM); core.position.copy(c); H.add(core); curls(c, .034, 70, .0065);
     const tie = new THREE.Mesh(new THREE.TorusGeometry(.028, .006, 6, 16), M3(spec.scrunchie || '#C9A7F5')); tie.position.copy(c).add(new THREE.Vector3(-sd * .01, -.026, 0)); tie.rotation.set(Math.PI / 2, 0, -sd * .5); H.add(tie); });
-  if ((spec.curlTop || spec.curlBuns) && C.hair) { const sl = tex(16, 16, (x, w, h) => { for (let y = 0; y < h; y++) for (let i = 0; i < w; i++) { const v = 170 + Math.sin(i * 2.1) * 25 + Math.random() * 30; x.fillStyle = `rgb(${v | 0},${v | 0},${v | 0})`; x.fillRect(i, y, 1, 1); } }); sl.magFilter = THREE.NearestFilter; sl.wrapS = sl.wrapT = THREE.RepeatWrapping; C.hair.material = M3(spec.hair, { map: sl, side: THREE.DoubleSide }); }
+  if ((spec.curlTop || spec.curlBuns) && C.hair) { const sl = tex(16, 16, (x, w, h) => { for (let y = 0; y < h; y++) for (let i = 0; i < w; i++) { const v = 170 + Math.sin(i * 2.1) * 25 + Math.random() * 30; x.fillStyle = `rgb(${v | 0},${v | 0},${v | 0})`; x.fillRect(i, y, 1, 1); } }); sl.magFilter = F(); sl.wrapS = sl.wrapT = THREE.RepeatWrapping; C.hair.material = M3(spec.hair, { map: sl, side: THREE.DoubleSide }); }
   if (spec.curlTop) { const c = new THREE.Vector3(0, fy + .045, ez - .075); curls(c, .068, spec.curlTop, .0075, { sy: .5, sx: 1.0, sz: 1.12, cap: .5 }); }
-  if (spec.cap) { // baseball cap (front or backward)
-    const g = new THREE.Group(); g.position.copy(hc).add(new THREE.Vector3(0, spec.capY ?? -.03, .004)); H.add(g); const cm = M3(spec.cap);
-    const dome = new THREE.Mesh(new THREE.SphereGeometry(.104, 24, 12, 0, Math.PI * 2, 0, Math.PI * .5), cm); dome.scale.set(1, .82, 1.12); dome.position.y = .012; g.add(dome);
-    const band = new THREE.Mesh(new THREE.CylinderGeometry(.104, .104, .022, 24, 1, true), cm); band.scale.set(1, 1, 1.12); band.position.y = .008; g.add(band);
-    const brim = new THREE.Mesh(new THREE.CylinderGeometry(.082, .082, .008, 22, 1, false, -Math.PI / 2, Math.PI), M3(spec.capBrim || spec.cap)); brim.scale.set(1, 1, 1.15); brim.position.set(0, .004, .098); brim.rotation.x = .32; g.add(brim);
-    const btn = new THREE.Mesh(new THREE.SphereGeometry(.009, 8, 6), cm); btn.position.y = .1; g.add(btn);
-    if (spec.capLogo) { const lg = new THREE.Mesh(new THREE.PlaneGeometry(.04, .03), new THREE.MeshLambertMaterial({ map: spec.capLogo, transparent: true })); lg.position.set(0, .05, .112); lg.rotation.x = -.35; g.add(lg); }
-    g.rotation.x = spec.capTilt ?? -.06; if (spec.capBack) g.rotation.y = Math.PI; g.scale.setScalar(spec.capScale ?? 1);
+  if (spec.cap) { // baseball cap: six-panel crown + curved brim
+    const g = new THREE.Group(); g.position.copy(hc).add(new THREE.Vector3(0, spec.capY ?? .0, spec.capZ ?? .006)); H.add(g);
+    const CH = spec.capH ?? .78; const cm = new THREE.MeshStandardMaterial({ color: spec.cap, roughness: .85 }), R0 = spec.capR ?? .086;
+    const crown = new THREE.Mesh(new THREE.SphereGeometry(R0, 48, 24, 0, Math.PI * 2, 0, Math.PI * .5), cm); crown.scale.set(1, spec.capH ?? .78, 1.13); g.add(crown);
+    const band = new THREE.Mesh(new THREE.CylinderGeometry(R0, R0 * 1.01, .018, 48, 1, true), cm); band.scale.set(1, 1, 1.13); band.position.y = -.009; g.add(band);
+    const seamM = new THREE.MeshStandardMaterial({ color: new THREE.Color(spec.cap).multiplyScalar(.82), roughness: .9 });
+    for (let k = 0; k < 6; k++) { const a = k / 6 * Math.PI * 2 + Math.PI / 6; const pts = []; for (let t = 0; t <= 12; t++) { const ph = t / 12 * Math.PI / 2; pts.push(new THREE.Vector3(Math.sin(ph) * Math.sin(a) * R0 * 1.002, Math.cos(ph) * R0 * CH + .0005, Math.sin(ph) * Math.cos(a) * R0 * 1.13 * 1.002)); }
+      g.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 16, .0012, 4), seamM)); }
+    [0, 1, 2, 3, 4, 5].forEach(k => { const a = k / 6 * Math.PI * 2; const e = new THREE.Mesh(new THREE.CircleGeometry(.003, 8), seamM); const ph = Math.PI * .28; e.position.set(Math.sin(ph) * Math.sin(a) * R0 * 1.003, Math.cos(ph) * R0 * CH, Math.sin(ph) * Math.cos(a) * R0 * 1.13 * 1.003); e.lookAt(e.position.clone().multiplyScalar(2)); g.add(e); });
+    const btn = new THREE.Mesh(new THREE.SphereGeometry(.007, 12, 8), cm); btn.scale.y = .5; btn.position.y = R0 * CH; g.add(btn);
+    // brim: curved annulus segment in front, drooping at the sides
+    const bw = Math.PI * .62, BL = spec.brimLen ?? .075, P = [], I = [], segA = 24, segR = 6;
+    for (let ia = 0; ia <= segA; ia++) { const a = -bw / 2 + ia / segA * bw;
+      for (let ir = 0; ir <= segR; ir++) { const u = ir / segR, r0x = R0 * .99, r0z = R0 * 1.13 * .99, cosA = Math.cos(a), sinA = Math.sin(a);
+        const L = BL * Math.pow(Math.cos(a / bw * Math.PI), .6) * u; const x = sinA * (r0x + L * .8), z = cosA * (r0z + L);
+        const y = -.012 - u * .006 - Math.pow(Math.abs(a) / (bw / 2), 2) * .014 * u; P.push(x, y, z); } }
+    for (let ia = 0; ia < segA; ia++) for (let ir = 0; ir < segR; ir++) { const a = ia * (segR + 1) + ir, b = a + segR + 1; I.push(a, b, a + 1, b, b + 1, a + 1); }
+    const bg = new THREE.BufferGeometry(); bg.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); bg.setIndex(I); bg.computeVertexNormals();
+    const brim = new THREE.Mesh(bg, new THREE.MeshStandardMaterial({ color: spec.capBrim || spec.cap, roughness: .85, side: THREE.DoubleSide })); g.add(brim);
+    const under = brim.clone(); under.material = new THREE.MeshStandardMaterial({ color: spec.capUnder || new THREE.Color(spec.capBrim || spec.cap).multiplyScalar(.9), roughness: .9, side: THREE.DoubleSide }); under.position.y = -.0025; g.add(under);
+    g.rotation.x = spec.capTilt ?? -.12; if (spec.capBack) g.rotation.y = Math.PI; g.scale.setScalar(spec.capScale ?? 1);
     C.cap = g; if (C.hair && !spec.capBack) C.hair.visible = false;
   }
-  if (spec.buns) [-1, 1].forEach(sd => { const b = new THREE.Mesh(new THREE.SphereGeometry(.036, 14, 10), M3(spec.hair, { map: (() => { const t = tex(16, 16, (x, w, h) => noise(x, w, h, '#ffffff', 40)); t.magFilter = THREE.NearestFilter; return t; })() })); b.position.set(sd * .058, fy + .085, ez - .085); H.add(b);
+  if (spec.buns) [-1, 1].forEach(sd => { const b = new THREE.Mesh(new THREE.SphereGeometry(.036, 14, 10), M3(spec.hair, { map: (() => { const t = tex(16, 16, (x, w, h) => noise(x, w, h, '#ffffff', 40)); t.magFilter = F(); return t; })() })); b.position.set(sd * .058, fy + .085, ez - .085); H.add(b);
     const tie = new THREE.Mesh(new THREE.TorusGeometry(.03, .006, 6, 16), M3(spec.scrunchie || '#C9A7F5')); tie.position.copy(b.position).add(new THREE.Vector3(-sd * .012, -.022, 0)); tie.rotation.set(Math.PI / 2, 0, -sd * .5); H.add(tie); });
   if (spec.clips) spec.clips.forEach((col, i) => { const wing = new THREE.Group(); [-1, 1].forEach(w => { const m = new THREE.Mesh(new THREE.CircleGeometry(.011, 10), M3(col, { side: THREE.DoubleSide, emissive: '#222' })); m.scale.set(1, .75, 1); m.position.x = w * .009; m.rotation.z = w * .4; wing.add(m); });
     const a = [-.9, -.35, .35, .9][i % 4]; wing.position.set(Math.sin(a) * .088, fy + .03 - Math.abs(a) * .02, ez - .09 + Math.cos(a) * .1); wing.lookAt(H.localToWorld(wing.position.clone().multiplyScalar(2))); wing.lookAt(wing.position.clone().add(new THREE.Vector3(Math.sin(a), .3, Math.cos(a)))); H.add(wing); });
   if (spec.shadesUp) { const g = new THREE.Group(); const lm = new THREE.MeshLambertMaterial({ color: spec.shadesUp, transparent: true, opacity: .75 });
     [-1, 1].forEach(sd => { const l = new THREE.Mesh(new THREE.CircleGeometry(.022, 16), lm); l.scale.set(1.35, .85, 1); l.position.x = sd * .034; g.add(l); });
     const br = new THREE.Mesh(new THREE.BoxGeometry(.03, .004, .004), M3('#e8e0f0')); g.add(br); g.position.set(0, fy + .07, ez + .0); g.rotation.x = -1.0; H.add(g); }
-  if (spec.lashes2) { C.lashes = []; [-1, 1].forEach(sd => { const ec = (sd > 0 ? C.eyeC.l : C.eyeC.r), g = new THREE.Group(); const lm = M3('#0d0806');
+  if (spec.lashes2 && !spec.faceTex) { C.lashes = []; [-1, 1].forEach(sd => { const ec = (sd > 0 ? C.eyeC.l : C.eyeC.r), g = new THREE.Group(); const lm = M3('#0d0806');
       for (let i = 0; i < 7; i++) { const u = i / 6 - .5, x = u * .026, out = sd * u > 0 ? Math.abs(u) : 0; const l = new THREE.Mesh(new THREE.BoxGeometry(.0022, .009 + out * .009, .0016), lm);
         l.position.set(sd * 0 + x, .0075 - u * u * .01 + out * .002, .004); l.rotation.z = -u * 1.1 - sd * out * .3; l.rotation.x = -.6; g.add(l); }
       g.position.set(ec.x - hp.x, ec.y - hp.y, ec.z - hp.z + .009); H.add(g); C.lashes.push(g); }); }
   if (spec.nosePierce) { const tip = C.noseTip.clone().sub(hp); const m = spec.nosePierce === 'septum' ? new THREE.Mesh(new THREE.TorusGeometry(.0055, .0011, 6, 16), M3('#D8D8D8', { emissive: '#333' })) : new THREE.Mesh(new THREE.SphereGeometry(.0022, 8, 6), M3('#F2E6C9', { emissive: '#665' }));
     if (spec.nosePierce === 'septum') { m.position.set(tip.x, tip.y - .012, tip.z - .006); } else { m.position.set(tip.x + .011, tip.y - .006, tip.z - .01); } H.add(m); }
-  if (spec.moneyPiece) [-1, 1].forEach(sd => { const st = new THREE.Mesh(new THREE.BoxGeometry(.008, .15, .01), M3(spec.moneyPiece, { map: (() => { const t = tex(4, 32, (x, w, h) => noise(x, w, h, '#ffffff', 30)); t.magFilter = THREE.NearestFilter; return t; })() }));
+  if (spec.moneyPiece) [-1, 1].forEach(sd => { const st = new THREE.Mesh(new THREE.BoxGeometry(.008, .15, .01), M3(spec.moneyPiece, { map: (() => { const t = tex(4, 32, (x, w, h) => noise(x, w, h, '#ffffff', 30)); t.magFilter = F(); return t; })() }));
       st.position.set(sd * .062, fy - .055, ez - .045); st.rotation.z = sd * .1; st.rotation.x = .1; H.add(st); });
   if (spec.earStack) [-1, 1].forEach(sd => { for (let i = 0; i < 3; i++) { const r = new THREE.Mesh(new THREE.TorusGeometry(.005, .0012, 5, 12), M3('#E9C45A', { emissive: '#4a3500' })); r.position.set(sd * (Math.abs(eyeL.x) + .03), eyeL.y - hp.y - .035 + i * .012, eyeL.z - hp.z - .07); r.rotation.y = Math.PI / 2; H.add(r); } });
   if (spec.studs) [-1, 1].forEach(sd => { const st = new THREE.Mesh(new THREE.SphereGeometry(.0035, 8, 6), M3('#F2E6C9', { emissive: '#554a2a' })); st.position.set(sd * (Math.abs(eyeL.x) + .028), eyeL.y - hp.y - .052, eyeL.z - hp.z - .072); H.add(st); });
@@ -381,23 +397,29 @@ export function lashBlink(C, v) { (C.lashes || []).forEach(l => l.visible = v < 
 function hairCards(H, spec, hc, hm) {
   const o = spec.cards, n = o.count ?? 46, len = o.len ?? .3, segs = 10, R0 = o.r ?? .1, rootY = o.rootY ?? .03;
   const col = new THREE.Color(spec.hair), hi = new THREE.Color(o.tips || spec.hair);
-  const strandT = tex(8, 64, (x, w, h) => { for (let y = 0; y < h; y++) for (let i = 0; i < w; i++) { const v = 200 + Math.sin(i * 2.3 + y * .05) * 30 + Math.random() * 30; x.fillStyle = `rgb(${v | 0},${v | 0},${v | 0})`; x.fillRect(i, y, 1, 1); } });
-  strandT.magFilter = THREE.NearestFilter; strandT.wrapS = strandT.wrapT = THREE.RepeatWrapping;
+  const strandT = (() => { const c = document.createElement('canvas'); c.width = 64; c.height = 256; const x = c.getContext('2d');
+    for (let i = 0; i < 64; i++) { const v = 175 + Math.sin(i * 1.7) * 25 + Math.sin(i * .43) * 30 + Math.random() * 25; x.fillStyle = `rgb(${v | 0},${v | 0},${v | 0})`; x.fillRect(i, 0, 1, 256); }
+    for (let k = 0; k < 40; k++) { x.fillStyle = `rgba(255,255,255,${.08 + Math.random() * .12})`; x.fillRect(Math.random() * 64 | 0, 0, 1, 256); }
+    const im = x.getImageData(0, 0, 64, 256); for (let y = 0; y < 256; y++) for (let i = 0; i < 64; i++) { const e = Math.min(i, 63 - i) / 10, tip = y > 200 ? Math.max(0, 1 - (y - 200) / 56 * (1 + Math.abs(Math.sin(i * 1.3)))) : 1;
+      im.data[(y * 64 + i) * 4 + 3] = 255 * Math.min(1, e) * tip; } x.putImageData(im, 0, 0);
+    const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t; })();
+  strandT.magFilter = F(); strandT.wrapS = strandT.wrapT = THREE.RepeatWrapping;
   let sd = 77; const rr = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
   for (let k = 0; k < n; k++) {
     const a = (k / (n - 1) - .5) * Math.PI * (o.spread ?? 1.72) + Math.PI; // around the back, ends at the temples
     const side = Math.sin(a) >= 0 ? 1 : -1;
     const dirOut = new THREE.Vector3(Math.sin(a), 0, Math.cos(a));
     const root = hc.clone().add(new THREE.Vector3(Math.sin(a) * R0 * .95, rootY + Math.cos(a) * -.01, Math.cos(a) * R0 * 1.12));
+    const streak = (o.streaks ?? 0) > rr() ? .45 + rr() * .3 : rr() * .12;
     const P = [], N = [], UV = [], I = [], C2 = [], w0 = (o.width ?? .034) * (.8 + rr() * .4), L = len * (.85 + rr() * .3);
     for (let j = 0; j <= segs; j++) { const t = j / segs;
       const out = Math.sin(Math.min(1, t * 2.2) * Math.PI / 2) * (o.bulge ?? .028) + t * .006;
       const c = root.clone().addScaledVector(dirOut, out).add(new THREE.Vector3(0, -t * L, 0)).add(new THREE.Vector3(Math.sin(t * 6 + k) * .004 * (o.wave ?? 1), 0, 0));
       const tan = new THREE.Vector3(Math.cos(a), 0, -Math.sin(a)); const w = w0 * (1 - t * .75);
-      [-1, 1].forEach(e => { const q = c.clone().addScaledVector(tan, e * w / 2); P.push(q.x, q.y, q.z); N.push(dirOut.x, 0, dirOut.z); UV.push(e > 0 ? 1 : 0, t * 3); const cc = col.clone().lerp(hi, Math.pow(t, 1.5)); C2.push(cc.r, cc.g, cc.b); }); }
+      [-1, 1].forEach(e => { const q = c.clone().addScaledVector(tan, e * w / 2); P.push(q.x, q.y, q.z); N.push(dirOut.x, 0, dirOut.z); UV.push(e > 0 ? 1 : 0, t * .98); const cc = col.clone().lerp(hi, Math.min(1, Math.pow(t, 1.3) * .8 + streak)); C2.push(cc.r, cc.g, cc.b); }); }
     for (let j = 0; j < segs; j++) { const b = j * 2; I.push(b, b + 1, b + 2, b + 1, b + 3, b + 2); }
     const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); g.setAttribute('normal', new THREE.Float32BufferAttribute(N, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(UV, 2)); g.setAttribute('color', new THREE.Float32BufferAttribute(C2, 3)); g.setIndex(I);
-    const m = new THREE.Mesh(g, new THREE.MeshLambertMaterial({ map: strandT, vertexColors: true, side: THREE.DoubleSide })); m.castShadow = true; H.add(m);
+    const m = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ map: strandT, vertexColors: true, side: THREE.DoubleSide, alphaTest: .35, roughness: .55 })); m.castShadow = true; H.add(m);
   }
 }
 
@@ -409,11 +431,12 @@ function addFace(C, D, geo, pos, spec, body) {
   for (let i = 0; i < n; i++) { const x = pos[i * 3], y = pos[i * 3 + 1]; uv[i * 2] = (x - cx) / half * .5 + .5; uv[i * 2 + 1] = (y - cy) / half * .5 + .5;
     const nz = nrm.getZ(i); const ex = Math.abs(x) / (half * .8), ey2 = (y - (cy + .005)) / (half * (y < cy ? (spec.faceChin ?? .6) : .95)); const r = Math.hypot(ex, ey2);
     let a = Math.min(1, Math.max(0, (nz - .2) / .35)) * Math.min(1, Math.max(0, (1 - r) / .18));
+    if (spec.faceTop != null) a *= Math.min(1, Math.max(0, (D.eyeC.l[1] + spec.faceTop - y) / .006));
     col[i * 4] = col[i * 4 + 1] = col[i * 4 + 2] = 1; col[i * 4 + 3] = a; }
   fg.setAttribute('uv', new THREE.BufferAttribute(uv, 2)); fg.setAttribute('color', new THREE.BufferAttribute(col, 4));
   const bI = D.groups.body, I = []; for (let k = 0; k < bI.length; k += 3) { const t = [bI[k], bI[k + 1], bI[k + 2]]; if (t.every(v => col[v * 4 + 3] > 0.001)) I.push(...t); }
   fg.clearGroups(); fg.setIndex(I);
-  let done; C.loading = (C.loading || []).concat(new Promise(r => done = r)); const t = new THREE.TextureLoader().load(spec.faceTex, () => done()); t.colorSpace = THREE.SRGBColorSpace; t.magFilter = THREE.NearestFilter; t.minFilter = THREE.LinearFilter; t.generateMipmaps = false;
+  let done; C.loading = (C.loading || []).concat(new Promise(r => done = r)); const t = new THREE.TextureLoader().load(spec.faceTex, () => done()); t.colorSpace = THREE.SRGBColorSpace; t.magFilter = F(); t.minFilter = THREE.LinearFilter; t.generateMipmaps = false;
   const m = new THREE.MeshLambertMaterial({ map: t, vertexColors: true, transparent: true, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2, depthWrite: false });
   const fm = new THREE.SkinnedMesh(fg, m); fm.frustumCulled = false; fm.bind(body.skeleton, body.bindMatrix);
   fm.morphTargetDictionary = body.morphTargetDictionary; fm.morphTargetInfluences = body.morphTargetInfluences; C.root.add(fm); C.faceMesh = fm;
@@ -423,7 +446,7 @@ function addFace(C, D, geo, pos, spec, body) {
 function addOutfit(C, geo, pos, spec, body) {
   const { cy, hh, hw } = spec.outfitProj, n = pos.length / 3, nrm = geo.attributes.normal;
   let done; C.loading = (C.loading || []).concat(new Promise(r => done = r));
-  const t = new THREE.TextureLoader().load(spec.outfitTex, () => done()); t.colorSpace = THREE.SRGBColorSpace; t.magFilter = THREE.NearestFilter; t.minFilter = THREE.LinearFilter; t.generateMipmaps = false;
+  const t = new THREE.TextureLoader().load(spec.outfitTex, () => done()); t.colorSpace = THREE.SRGBColorSpace; t.magFilter = F(); t.minFilter = THREE.LinearFilter; t.generateMipmaps = false;
   for (const side of [1, -1]) {
     const g = geo.clone(), uv = new Float32Array(n * 2), col = new Float32Array(n * 4);
     for (let i = 0; i < n; i++) { const x = pos[i * 3], y = pos[i * 3 + 1], nz = nrm.getZ(i) * side;
