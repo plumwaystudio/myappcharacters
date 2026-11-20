@@ -1,0 +1,16 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{margin:0}</style>
+<script type="importmap">{"imports":{"three":"../node_modules/three/build/three.module.js"}}</script></head><body><script type="module">
+import * as THREE from 'three';
+import { loadMH, makeMH, morph } from '../engine/mh.js';
+const who=new URLSearchParams(location.search).get('c');
+const SPEC=await (await fetch('../cast/looks.json?'+Date.now())).json(); const sp={...SPEC[who], faceTex:null, cap:null, cards:null, roundGlasses:null, shadesUp:null, clips:null, chain:false, hood:false, lashes2:false};
+const D=await loadMH('../cast/built/'+who+'-mh.json'); const C=makeMH(D,sp);
+const R=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true}); R.setSize(1280,720); R.outputColorSpace=THREE.SRGBColorSpace; R.setScissorTest(true); document.body.appendChild(R.domElement);
+const S=new THREE.Scene(); S.background=new THREE.Color('#808080'); S.add(new THREE.AmbientLight('#ffffff',2.2)); const d=new THREE.DirectionalLight('#ffffff',.5); d.position.set(0,1,5); S.add(d); const d2=d.clone(); d2.position.set(0,1,-5); S.add(d2); S.add(C.root);
+C.root.updateMatrixWorld(true);
+const cy=.93, hh=.94, hw=hh*640/720;
+const mk=(z)=>{const c=new THREE.OrthographicCamera(-hw,hw,hh,-hh,.01,20); c.position.set(0,cy,z); c.lookAt(0,cy,0); return c;};
+R.setViewport(0,0,640,720); R.setScissor(0,0,640,720); R.render(S,mk(5));
+R.setViewport(640,0,640,720); R.setScissor(640,0,640,720); R.render(S,mk(-5));
+window.params={cy,hh,hw}; window.img=R.domElement.toDataURL('image/png'); window.ready=true;
+</script></body></html>
