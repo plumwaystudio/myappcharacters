@@ -9,6 +9,7 @@ jobs:
     timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
       - run: pip install pillow requests
       - run: |
           python - <<'PY'
