@@ -20,7 +20,7 @@
 |---|---|---|---|---|---|
 | 01 Bri | Nia. Explain this cart. | `N1RtTJqkBXKd178hHPKy` | `jDH8FtPb2w3cUv3hqVQD` | `mmfTvG4X3VU7tXUZ1wZT` | Video and v4 audio complete; lip-sync complete (2.25s) |
 | 02 Nia | Shipping was seven dollars. | `LF5sQycNcD2265JR6Ffo` | `pS0CozZI0WpYocQOVlqT` | `8crYKCtUIwHNQ0RURWa7` | Video and v4 audio complete; lip-sync complete (1.96s) |
-| 03 Bri | So you added sixty-eight? | `4yqqHpTdcpgOtwKxfdcZ` | `vcdZx169BznGnGKVrKxv` | `ipTckadoZmbRFt0gxnZ3` | Video and v4 audio complete; lip-sync processing at last check |
+| 03 Bri | So you added sixty-eight? | `4yqqHpTdcpgOtwKxfdcZ` | `vcdZx169BznGnGKVrKxv` | `ipTckadoZmbRFt0gxnZ3` | Video and v4 audio complete; lip-sync complete (2.0s) |
 | 04 Nia | I'm not paying for shipping. | `0uJpddSGxYUihhdo8dbj` | `EloCmGTK1TjL8GKCRYHC` | — | Video and v4 audio complete; lip-sync not yet run |
 | 05 Kid | Exactly. Never let shipping win. | `FVgzIuvHIMO27LKiTXhZ` | `am7yScBlwFW72JaWXmxR` | — | TTS complete; video generation blocked by credit quota |
 | 06 LOWKEY | You're about to spend sixty-one extra to avoid seven. | `LgP2lJKBH5EchC434V1i` | `GX8cju8Wn4JbIkerxUbP` | — | TTS complete; video pending; visual plate set to 6s since the v4 line runs 4.08s |
@@ -34,7 +34,7 @@ ElevenLabs returned `quota_exceeded` when shot 05 was submitted: **827 credits r
 The actual screenshot provided in conversation (`IMG_5016.jpeg`) was converted locally to a 3.5s 9:16 MP4 without generating a fake UI or adding any captions: `/mnt/data/cooloff_v2/REAL_COOL_OFF_APP_INSERT.mp4`. It should be appended only after the last line in the final cut.
 
 ## Continuation sequence when budget is available
-1. Confirm whether shot 03 lip-sync completed; inspect its identity before accepting.
+1. Inspect shot 03 completed lip-sync for identity and natural voice before accepting.
 2. Lip-sync shot 04 with its exact v4 dialogue.
 3. Generate scenes 05–08 individually using the existing in-scene portrait nodes. **Never connect master sheets to video frame inputs.**
 4. Lip-sync each shot; preserve original TTS audio at final mix.
