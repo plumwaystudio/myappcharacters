@@ -1,8 +1,5 @@
 name: Assemble COOL OFF ElevenLabs character reel
 on:
-  push:
-    paths:
-      - 'skits/cool-off-receipt/sources.json'
   workflow_dispatch:
 jobs:
   render:
