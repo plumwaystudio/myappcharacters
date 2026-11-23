@@ -22,8 +22,9 @@ jobs:
       - run: python -m playwright install --with-deps chromium
       - run: sudo apt-get update && sudo apt-get install -y ffmpeg
       - run: python skits/cool-off-receipt/render.py
+      - run: bash skits/cool-off-receipt/mix_audio.sh
       - uses: actions/upload-artifact@v4
         with:
           name: cool-off-receipt-first-pass
-          path: skits/cool-off-receipt/out/video.mp4
+          path: skits/cool-off-receipt/out/cool-off-receipt-final.mp4
           if-no-files-found: error
