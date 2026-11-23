@@ -1,0 +1,37 @@
+name: COOL OFF first-three clip visual QC
+on:
+  push:
+    paths: ['.github/workflows/cooloff-qc.yml']
+  workflow_dispatch:
+jobs:
+  qc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install pillow requests
+      - run: |
+          python - <<'PY'
+          import requests, subprocess, os
+          from PIL import Image, ImageDraw
+          urls=["https://elevenlabsusercontent.com/database/workspace/367d8ef9e6db49769fa095a31855c94b/content_generation/ZGjUekgqPp8D519iNTfr/75FkkNelfaKUJqxuAhmD/content.mp4?Expires=1795410000&KeyName=assets-cdn-key-1&Signature=ZiqrWfw8TXXna26bM4sTKvycI-8=","https://elevenlabsusercontent.com/database/workspace/367d8ef9e6db49769fa095a31855c94b/content_generation/9ZmSRsUtlkgjMAg9WlDD/d2fAiy0BF8v4SAr8fIgq/content.mp4?Expires=1795410000&KeyName=assets-cdn-key-1&Signature=Bx5n_gMBfxNGyOmTTSRs6WSn04A=","https://elevenlabsusercontent.com/database/workspace/367d8ef9e6db49769fa095a31855c94b/content_generation/FC939y48Ouq8gzYY02yB/Db6cNzcbjJJduxB0vZ6B/content.mp4?Expires=1795410000&KeyName=assets-cdn-key-1&Signature=vFH3DouUADzZQlkiqc1E7Wtg8Ng="]
+          os.makedirs('qcshots',exist_ok=True)
+          cards=[]
+          for i,u in enumerate(urls,1):
+              r=requests.get(u,timeout=60);r.raise_for_status()
+              open(f'qcshots/c{i}.mp4','wb').write(r.content)
+              for label,t in [('start','.15'),('mid','2.0'),('end','3.7')]:
+                  fname=f'qcshots/c{i}-{label}.jpg'
+                  subprocess.run(['ffmpeg','-y','-v','error','-ss',t,'-i',f'qcshots/c{i}.mp4','-frames:v','1','-vf','scale=240:427',fname],check=True)
+                  cards.append((fname,f'C{i} {label}'))
+          out=Image.new('RGB',(240*len(cards),475),(220,220,220))
+          dr=ImageDraw.Draw(out)
+          for j,(name,label) in enumerate(cards):
+              im=Image.open(name).convert('RGB');out.paste(im,(j*240,35))
+              dr.text((j*240+6,8),label,fill='black')
+          out.save('qcshots/CONTACT.png')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cooloff-qc-contact
+          path: qcshots/CONTACT.png
