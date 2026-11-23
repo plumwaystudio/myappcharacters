@@ -15,7 +15,7 @@ jobs:
           python - <<'PY'
           import requests, subprocess, os
           from PIL import Image, ImageDraw
-          urls=["https://elevenlabsusercontent.com/database/workspace/367d8ef9e6db49769fa095a31855c94b/content_generation/ZGjUekgqPp8D519iNTfr/75FkkNelfaKUJqxuAhmD/content.mp4?Expires=1795410000&KeyName=assets-cdn-key-1&Signature=ZiqrWfw8TXXna26bM4sTKvycI-8=","https://elevenlabsusercontent.com/database/workspace/367d8ef9e6db49769fa095a31855c94b/content_generation/9ZmSRsUtlkgjMAg9WlDD/d2fAiy0BF8v4SAr8fIgq/content.mp4?Expires=1795410000&KeyName=assets-cdn-key-1&Signature=Bx5n_gMBfxNGyOmTTSRs6WSn04A=","https://elevenlabsusercontent.com/database/workspace/367d8ef9e6db49769fa095a31855c94b/content_generation/FC939y48Ouq8gzYY02yB/Db6cNzcbjJJduxB0vZ6B/content.mp4?Expires=1795410000&KeyName=assets-cdn-key-1&Signature=vFH3DouUADzZQlkiqc1E7Wtg8Ng="]
+          urls=["https://elevenlabsusercontent.com/database/workspace/367d8ef9e6db49769fa095a31855c94b/content_generation/tFqk4b3oUMCyarO5kOE4/UGRqIzgwDuE9L3GYRSQA/content.mp4?Expires=1795410000&KeyName=assets-cdn-key-1&Signature=Dt1mDbstrjYTCk9mDZNt0thmttA=","https://elevenlabsusercontent.com/database/workspace/367d8ef9e6db49769fa095a31855c94b/content_generation/55YDD42Ysz81yzbRVKOb/u0EsYh8aQG2BF9KJ9wQa/content.mp4?Expires=1795410000&KeyName=assets-cdn-key-1&Signature=toko7sryQzTmIG0WWHDjqlSO8Vw=","https://elevenlabsusercontent.com/database/workspace/367d8ef9e6db49769fa095a31855c94b/content_generation/VyDbMJw5KBBbtTpzGk3R/Wz7JiaEAMV3d7x3a2zuT/content.mp4?Expires=1795410000&KeyName=assets-cdn-key-1&Signature=iD4Wopi1_A5VMnaxepZoRPXGp_0="]
           os.makedirs('qcshots',exist_ok=True)
           cards=[]
           for i,u in enumerate(urls,1):
@@ -34,5 +34,5 @@ jobs:
           PY
       - uses: actions/upload-artifact@v4
         with:
-          name: cooloff-qc-contact
+          name: cooloff-cast-b-final-QC
           path: qcshots/CONTACT.png
