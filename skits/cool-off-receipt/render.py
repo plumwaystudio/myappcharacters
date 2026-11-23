@@ -8,7 +8,7 @@ here=os.path.dirname(__file__); os.makedirs(os.path.join(here,'out'),exist_ok=Tr
 ff=subprocess.Popen(['ffmpeg','-loglevel','error','-y','-f','image2pipe','-framerate','30','-c:v','mjpeg','-i','-','-c:v','libx264','-preset','veryfast','-crf','18','-pix_fmt','yuv420p','-r','30',out],stdin=subprocess.PIPE)
 with sync_playwright() as p:
     b=p.chromium.launch(args=['--use-angle=swiftshader','--enable-unsafe-swiftshader'])
-    pg=b.new_page(viewport={'width':1080,'height':1920}); pg.goto(f'http://127.0.0.1:{P}/skits/glow-tax-trip/scene.html'); pg.wait_for_function('window.ready===true',timeout=120000)
+    pg=b.new_page(viewport={'width':1080,'height':1920}); pg.goto(f'http://127.0.0.1:{P}/skits/cool-off-receipt/scene.html'); pg.wait_for_function('window.ready===true',timeout=120000)
     dur=pg.evaluate('window.DUR'); n=int(dur*30)
     for i in range(n):
         d=pg.evaluate(f'frame({i/30})'); ff.stdin.write(base64.b64decode(d.split(',')[1]))
