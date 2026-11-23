@@ -1,0 +1,32 @@
+name: Export corrected COOL OFF completed scenes
+on:
+  push:
+    paths: ['.github/workflows/cooloff-corrected-preview.yml']
+  workflow_dispatch:
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+      - run: python -m pip install requests
+      - run: |
+          python - <<'PY'
+          import requests,subprocess,os
+          from pathlib import Path
+          p=Path('preview');p.mkdir(exist_ok=True)
+          urls=["https://elevenlabsusercontent.com/database/workspace/367d8ef9e6db49769fa095a31855c94b/content_generation/3yM8mEHcNtgo79wQ6WJm/HxScsqw5BSAn45B2S2TZ/content.mp4?Expires=1795410000&KeyName=assets-cdn-key-1&Signature=fKjz7R3Q_Q5ov2Y0jdnxmxHn-Hw=","https://elevenlabsusercontent.com/database/workspace/367d8ef9e6db49769fa095a31855c94b/content_generation/e4OOA3fLJYVHHvC6I02k/58Ld4jDmmdNcslIBsURb/content.mp4?Expires=1795410000&KeyName=assets-cdn-key-1&Signature=KbwYimH-eIoeBlBrfn1CAYMqElk=","https://elevenlabsusercontent.com/database/workspace/367d8ef9e6db49769fa095a31855c94b/content_generation/HAee8U04xwnIEqw924bo/5ZjTbATLrcCGEkQQyRLw/content.mp4?Expires=1795410000&KeyName=assets-cdn-key-1&Signature=sPP0urelC3BIiivQ9mQ-2BOAl7M="]
+          for i,u in enumerate(urls,1):
+              r=requests.get(u,timeout=70);r.raise_for_status()
+              raw=p/f'{i:02d}-raw.mp4';raw.write_bytes(r.content)
+              assert len(r.content)>20000
+              subprocess.run(['ffmpeg','-y','-loglevel','error','-i',str(raw),'-vf','scale=1080:1920,setsar=1','-r','30','-c:v','libx264','-preset','veryfast','-crf','22','-pix_fmt','yuv420p','-c:a','aac','-b:a','192k',str(p/f'{i:02d}-prepared.mp4')],check=True)
+          (p/'inputs.txt').write_text(''.join(f"file '{i:02d}-prepared.mp4'\\n" for i in range(1,len(urls)+1)).replace('\\n','\n'))
+          subprocess.run(['ffmpeg','-y','-loglevel','error','-f','concat','-safe','0','-i',str(p/'inputs.txt'),'-c','copy','-movflags','+faststart',str(p/'COOL_OFF_CORRECTED_SCENES_PREVIEW.mp4')],check=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: COOL_OFF_CORRECTED_SCENES_PREVIEW
+          path: preview/COOL_OFF_CORRECTED_SCENES_PREVIEW.mp4
+          if-no-files-found: error
