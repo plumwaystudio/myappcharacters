@@ -1,0 +1,20 @@
+name: Assemble COOL OFF ElevenLabs character reel
+on:
+  push:
+    paths:
+      - 'skits/cool-off-receipt/sources.json'
+  workflow_dispatch:
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y ffmpeg fonts-dejavu-core
+      - run: pip install pillow requests
+      - run: python skits/cool-off-receipt/assemble_elevenlabs.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: COOL_OFF_THE_RECEIPT_final_mp4
+          path: skits/cool-off-receipt/out/COOL_OFF_THE_RECEIPT.mp4
+          if-no-files-found: error
